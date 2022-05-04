@@ -100,7 +100,7 @@ export const ChatRoom = ({navigation}) => {
                 ))}
             </ScrollView>
 
-            <TouchableOpacity style={styles.fab} onPress={()=> setIsOpen(!isOpen)}>
+            <TouchableOpacity style={styles.fab} onPress={()=> setIsOpen(!isOpen)} activeOpacity={0.5}>
                 <Image source={require('../../assets/FAB.png')} resizeMode='contain' style={{width:50, height:50}} />
             </TouchableOpacity>
         </View>
@@ -118,7 +118,7 @@ const styles = StyleSheet.create({
         width:50, 
         height:50, 
         position: 'absolute', 
-        bottom:100, 
+        bottom:75, 
         right:20
     },
     modalContainer:{

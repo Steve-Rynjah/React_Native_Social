@@ -3,7 +3,8 @@ import {View, Image, StyleSheet} from 'react-native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 
 import {Home} from '../screen/Home.screen';
-import {ChatRoom} from '../screen/ChatRoom.screen'
+import {ChatRoom} from '../screen/ChatRoom.screen';
+import {Setting} from '../screen/Setting.screen';
 
 const Tab = createBottomTabNavigator();
 
@@ -18,14 +19,15 @@ export const TabNav = () => {
         name="Home"
         component={Home}
         options={{
+          headerTitle:'',
           tabBarIcon: ({focused}) => (
             <View style={{alignItems: 'center', justifyContent: 'center'}}>
               <Image
                 source={require('../../assets/home.png')}
                 resizeMode="contain"
                 style={{
-                  width: 40,
-                  height: 40,
+                  width: 35,
+                  height: 35,
                   tintColor: focused ? '#ffffff' : '#f1f1f1aa',
                 }}
               />
@@ -40,14 +42,29 @@ export const TabNav = () => {
                 source={require('../../assets/chat.png')}
                 resizeMode="contain"
                 style={{
-                  width: 40,
-                  height: 40,
+                  width: 35,
+                  height: 35,
                   tintColor: focused ? '#ffffff' : '#f1f1f1aa',
                 }}
               />
             </View>
           ),
         }}/>
+      <Tab.Screen name="Setting" component={Setting} options={{
+          tabBarIcon: ({focused}) => (
+            <View style={{alignItems: 'center', justifyContent: 'center'}}>
+              <Image
+                source={require('../../assets/setting.png')}
+                resizeMode="contain"
+                style={{
+                  width: 35,
+                  height: 35,
+                  tintColor: focused ? '#ffffff' : '#f1f1f1aa',
+                }}
+              />
+            </View>
+          ),
+        }}/>  
     </Tab.Navigator>
   );
 };
@@ -55,13 +72,14 @@ export const TabNav = () => {
 const styles = StyleSheet.create({
   bottomTabContainer: {
     position: 'absolute',
-    bottom: 15,
-    left: 20,
-    right: 20,
+    bottom: 0,
+    left: 0,
+    right: 0,
     elevation: 5,
     backgroundColor: '#fcb126',
-    borderRadius: 15,
-    height: 65,
+    // borderTopLeftRadius:15,
+    // borderTopRightRadius:15,
+    height: 55,
     shadowColor: '#fcb126',
     shadowOffset: {
       width: 0,
