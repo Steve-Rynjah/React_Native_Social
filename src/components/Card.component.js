@@ -1,21 +1,22 @@
 import React from "react";
 import {View, Text, TouchableOpacity, Image, StyleSheet} from 'react-native'
 import {Avatar} from '@rneui/themed'
+import auth from '@react-native-firebase/auth';
 
-export const Card = ({avatar,displayName,timestamp,image,feed}) => {
+export const Card = ({timestamp,image,feed}) => {
     return(
         <View style={styles.container}>
             <View style={styles.headerContainer}>
-                <Avatar rounded source={{uri: avatar}} size={50}/>
+                <Avatar rounded source={{uri: auth().currentUser.photoURL}} size={50}/>
                 <View style={{flexDirection: 'column'}}>
-                    <Text style={styles.displayName}>{displayName}</Text>
+                    <Text style={styles.displayName}>{auth().currentUser.displayName}</Text>
                     <Text style={styles.timestamp}>{timestamp}</Text>
                 </View>
             </View>
             <View style={{width: '100%', height: 300, marginTop: 10}}>
                 <Image source={{uri: image}} resizeMode='cover' style={styles.image}/>
             </View>
-            <Text style={styles.displayName}>{displayName}{'   '}<Text style={styles.feed}>{feed}</Text></Text>
+            <Text style={styles.displayName}>{auth().currentUser.displayName}{'   '}<Text style={styles.feed}>{feed}</Text></Text>
             <View style={styles.footerContainer}>
                 <Image source={require('../../assets/heart.png')} resizeMode='contain' style={styles.icon}/>
                 <Text style={styles.text}>Likes</Text>
@@ -32,7 +33,7 @@ const styles = StyleSheet.create({
         height: 455,
         backgroundColor: '#fff',
         elevation: 1,
-        marginTop:10
+        marginTop:5
     },
     headerContainer:{
         flexDirection: 'row',

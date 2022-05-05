@@ -2,13 +2,12 @@ import React,{useLayoutEffect, useState} from "react";
 import {View, Text, TouchableOpacity, Image, StyleSheet, TextInput, KeyboardAvoidingView, Platform, ScrollView} from 'react-native'
 import {Images} from '../../assets'
 import ImagePicker from 'react-native-image-crop-picker';
-
-
+import firestore from "@react-native-firebase/firestore";
+import auth from '@react-native-firebase/auth';
 
 export const Post = ({navigation}) => {
     const [image, setImage] = useState('')
     const [input, setInput] = useState('')
-
 
         //Header
         useLayoutEffect(()=>{
@@ -42,20 +41,27 @@ export const Post = ({navigation}) => {
             });
         }
 
-        // const onSubmitPost = async () => {
-        //     const uploadUri = image;
-        //     let fileName = uploadUri.substring(uploadUri.lastIndexOf('/') + 1)
+        const onPost = () => {
+            firestore()
+            .collection('posts')
+            .add({
+                userId: auth().currentUser.uid,
+                post: input,
+                postImg: image,
+                time: firestore.Timestamp.fromDate(new Date()),
+                likes: null,
+                comment: null
+            })
+            .then(()=> {
+                console.log("Post added successfully!")
+                navigation.navigate('Home')
+                setImage('')
+                setInput('')
+            })
+            .catch((error)=> console.log("Error",error))
+            
+        }
 
-        //     setIsLoading(true);
-        //     try{
-        //         await storage().ref(fileName).putFile(uploadUri)
-        //         setIsLoading(false)
-        //     } catch(e){
-        //         console.log('Error')
-        //     }
-        //     console.log('URI',uploadUri)
-        //     setImage('')
-        // }
 
     return(
         <View style={{flex:1, backgroundColor: '#fff'}}>
@@ -83,7 +89,7 @@ export const Post = ({navigation}) => {
                 </View>
 
                 <View style={image.length>0 ? styles.button : styles.disableButton}>
-                    <TouchableOpacity activeOpacity={0.5} onPress={onSubmitPost}>
+                    <TouchableOpacity activeOpacity={0.5} onPress={onPost}>
                         <Text style={styles.buttonText}>Post</Text>
                     </TouchableOpacity>
                 </View>
