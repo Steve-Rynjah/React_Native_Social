@@ -1,22 +1,34 @@
-import React from "react";
+import React,{useEffect} from "react";
 import {View, Text, TouchableOpacity, Image, StyleSheet} from 'react-native'
 import {Avatar} from '@rneui/themed'
+import {Images} from '../../assets'
+import moment from 'moment';
 import auth from '@react-native-firebase/auth';
 
-export const Card = ({timestamp,image,feed}) => {
+
+export const Card = ({item, onDelete}) => {
+
+    useEffect(()=>{
+        console.log('Item',item.data.userId)
+    },[])
     return(
         <View style={styles.container}>
             <View style={styles.headerContainer}>
                 <Avatar rounded source={{uri: auth().currentUser.photoURL}} size={50}/>
-                <View style={{flexDirection: 'column'}}>
+                <View style={{flexDirection: 'column', width: 300}}>
                     <Text style={styles.displayName}>{auth().currentUser.displayName}</Text>
-                    <Text style={styles.timestamp}>{timestamp}</Text>
+                    <Text style={styles.timestamp}>{moment(item.data.postTime.toDate()).fromNow()}</Text>
                 </View>
+                {auth().currentUser.uid == item.data.userId ? (
+                    <TouchableOpacity activeOpacity={0.5} onPress={()=> onDelete(item.id)}>
+                        <Image source={Images.delete} resizeMode='contain' style={{width:20, height:20, marginLeft:15, tintColor: 'rgba(0,0,0,0.8)'}} />
+                    </TouchableOpacity>
+                ) : null}
             </View>
             <View style={{width: '100%', height: 300, marginTop: 10}}>
-                <Image source={{uri: image}} resizeMode='cover' style={styles.image}/>
+                <Image source={{uri: item.data.postImg}} resizeMode='cover' style={styles.image}/>
             </View>
-            <Text style={styles.displayName}>{auth().currentUser.displayName}{'   '}<Text style={styles.feed}>{feed}</Text></Text>
+            <Text style={styles.displayName}>{auth().currentUser.displayName}{'   '}<Text style={styles.feed}>{item.data.post}</Text></Text>
             <View style={styles.footerContainer}>
                 <Image source={require('../../assets/heart.png')} resizeMode='contain' style={styles.icon}/>
                 <Text style={styles.text}>Likes</Text>
@@ -79,5 +91,16 @@ const styles = StyleSheet.create({
         color: 'rgba(0,0,0,0.7)',
         marginLeft:5,
         marginRight:10
+    },
+    text_:{
+        fontSize: 12,
+        fontWeight: '500',
+        color: 'rgba(0,0,0,0.7)',
+        alignSelf: 'center'
+    },
+    dropDown:{
+        marginLeft:250,
+        elevation:4,
+        marginTop:-100
     }
 })

@@ -1,6 +1,7 @@
 import React from 'react';
 import {View, Image, StyleSheet} from 'react-native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+import {Images} from '../../assets'
 
 import {Home} from '../screen/Home.screen';
 import {ChatRoom} from '../screen/ChatRoom.screen';
@@ -23,7 +24,7 @@ export const TabNav = () => {
           tabBarIcon: ({focused}) => (
             <View style={{alignItems: 'center', justifyContent: 'center'}}>
               <Image
-                source={require('../../assets/home.png')}
+                source={Images.home}
                 resizeMode="contain"
                 style={{
                   width: 35,
@@ -39,7 +40,7 @@ export const TabNav = () => {
           tabBarIcon: ({focused}) => (
             <View style={{alignItems: 'center', justifyContent: 'center'}}>
               <Image
-                source={require('../../assets/chat.png')}
+                source={Images.chat}
                 resizeMode="contain"
                 style={{
                   width: 35,
@@ -54,7 +55,7 @@ export const TabNav = () => {
           tabBarIcon: ({focused}) => (
             <View style={{alignItems: 'center', justifyContent: 'center'}}>
               <Image
-                source={require('../../assets/setting.png')}
+                source={Images.profile}
                 resizeMode="contain"
                 style={{
                   width: 35,

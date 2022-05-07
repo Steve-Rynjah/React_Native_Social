@@ -10,5 +10,8 @@ export const Images = {
     heart: require('./heart.png'),
     send: require('./send.png'),
     attach: require('./attach.png'),
-    mic: require('./mic.png')
+    mic: require('./mic.png'),
+    menu: require('./menu.png'),
+    delete: require('./close.png'),
+    profile: require('./profile.png')
 }

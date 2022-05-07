@@ -1,12 +1,13 @@
 import React, {useLayoutEffect, useState, useEffect} from 'react';
-import {View,Text, TouchableOpacity, StyleSheet, Image, ScrollView, FlatList} from 'react-native';
+import {View,Text, TouchableOpacity, StyleSheet, Image, FlatList, Alert} from 'react-native';
 import {Images} from '../../assets'
 import {Card} from '../components/Card.component'
-import auth from '@react-native-firebase/auth';
 import firestore from "@react-native-firebase/firestore";
+import storage from '@react-native-firebase/storage'
 
 export const Home = ({navigation}) => {
     const [state, setState] = useState([])
+    const [deleted, setDeleted] = useState(false)
 
     //Header
     useLayoutEffect(()=>{
@@ -37,6 +38,84 @@ export const Home = ({navigation}) => {
         return unsubscribe;
     },[])
 
+    //For Rendering after Delete Post
+    useEffect(()=>{
+        const unsubscribe = firestore()
+        .collection('posts')
+        .onSnapshot((snapshot)=> setState(
+            snapshot.docs.map((doc)=>({
+                id: doc.id,
+                data: doc.data()
+            }))
+        ))
+        console.log('State',state)
+        setDeleted(false)
+        return unsubscribe;
+    },[deleted])
+
+    const deleteHandler = (postId) => {
+        Alert.alert(
+          'Delete post',
+          'Are you sure?',
+          [
+            {
+              text: 'Cancel',
+              onPress: () => console.log('Cancel Pressed!'),
+              style: 'cancel',
+            },
+            {
+              text: 'Confirm',
+              onPress: () => onDeletePost(postId),
+            },
+          ],
+          {cancelable: false},
+        );
+      };
+
+    //DELETE Request
+    const onDeletePost = (postId) => {
+        console.log('POST ID', postId)
+
+        firestore()
+        .collection('posts')
+        .doc(postId)
+        .get()
+        .then(snapshot => {
+            if(snapshot.exists){
+                const {postImg} = snapshot.data()
+
+                if(postImg != null){
+                    const storageRef = storage().refFromURL(postImg)
+                    const imageRef = storage().ref(storageRef.fullPath)
+
+                    imageRef
+                    .delete()
+                    .then(()=> {
+                        console.log(`${postImg} has been deleted`)
+                        deletePostFirestore(postId)
+                        setDeleted(true)
+                    })
+                    .catch((e)=>{
+                        console.log("Error",e)
+                    })
+                }
+            }
+        })
+    }
+
+    const deletePostFirestore = (postId) => {
+        firestore()
+        .collection('posts')
+        .doc(postId)
+        .delete()
+        .then(()=>{
+            Alert.alert('Post successfully deleted')
+        })
+        .catch((e)=>{
+            Alert.alert(e)
+        })
+    }
+
     return(
         <View style={{flex: 1, backgroundColor: '#fff'}}>
             <FlatList
@@ -45,7 +124,7 @@ export const Home = ({navigation}) => {
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={{paddingBottom:50, marginTop: -5}}
                 renderItem={({item})=>(
-                    <Card image={item.data.postImg} timestamp={item.data.time.toString()} feed={item.data.post}/>
+                    <Card item={item} onDelete={deleteHandler}/>
                 )}
             />
         </View>

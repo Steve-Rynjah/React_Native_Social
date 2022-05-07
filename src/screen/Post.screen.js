@@ -1,12 +1,13 @@
 import React,{useLayoutEffect, useState} from "react";
-import {View, Text, TouchableOpacity, Image, StyleSheet, TextInput, KeyboardAvoidingView, Platform, ScrollView} from 'react-native'
+import {View, Text, TouchableOpacity, Image, StyleSheet, TextInput, KeyboardAvoidingView, Platform, ScrollView, Alert} from 'react-native'
 import {Images} from '../../assets'
 import ImagePicker from 'react-native-image-crop-picker';
 import firestore from "@react-native-firebase/firestore";
 import auth from '@react-native-firebase/auth';
+import storage from '@react-native-firebase/storage'
 
 export const Post = ({navigation}) => {
-    const [image, setImage] = useState('')
+    const [image, setImage] = useState(null)
     const [input, setInput] = useState('')
 
         //Header
@@ -37,31 +38,107 @@ export const Post = ({navigation}) => {
             }).then(image => {
               const imageUri = Platform.OS === 'ios' ? image.sourceURL : image.path
               setImage(imageUri)
-              // panelRef.current.togglePanel()
             });
         }
 
-        const onPost = () => {
+        // const uploadImage = async () => {
+        //     const uploadUri = image;    
+        //     let filename = uploadUri.substring(uploadUri.lastIndexOf('/') + 1)
+            
+        //     const extension = filename.split('.').pop()
+        //     const name = filename.split('.').slice(0,-1).join('.')
+        //     filename = name + Date.now() + '.' +extension
+
+        //     const task = storage().ref(filename).putFile(uploadUri) 
+
+        //     try{
+        //         await task
+        //     }catch(e){()=> console.log("error",e)}
+        // }
+        // firestore()
+        //     .collection('posts')
+        //     .add({
+        //         userId: auth().currentUser.uid,
+        //         post: input,
+        //         // postImg: imageUrl,
+        //         time: firestore.Timestamp.fromDate(new Date()),
+        //         likes: null,
+        //         comment: null
+        //     })
+
+        
+
+        const submitPost = async () => {
+            const imageUrl = await uploadImage();
+            console.log('Image Url: ', imageUrl);
+          
             firestore()
             .collection('posts')
             .add({
-                userId: auth().currentUser.uid,
-                post: input,
-                postImg: image,
-                time: firestore.Timestamp.fromDate(new Date()),
-                likes: null,
-                comment: null
+              userId: auth().currentUser.uid,
+              post: input,
+              postImg: imageUrl,
+              postTime: firestore.Timestamp.fromDate(new Date()),
+              likes: null,
+              comments: null,
             })
-            .then(()=> {
-                console.log("Post added successfully!")
-                navigation.navigate('Home')
-                setImage('')
-                setInput('')
+            .then(() => {
+              navigation.navigate('Home')
+              setPost(null);
             })
-            .catch((error)=> console.log("Error",error))
-            
+            .catch((error) => {
+              console.log('Something went wrong with added post to firestore.', error);
+            });
+          }
+        
+          const uploadImage = async () => {
+            if( image == null ) {
+              return null;
+            }
+            const uploadUri = image;
+            let filename = uploadUri.substring(uploadUri.lastIndexOf('/') + 1);
+        
+            // Add timestamp to File Name
+            const extension = filename.split('.').pop(); 
+            const name = filename.split('.').slice(0, -1).join('.');
+            filename = name + Date.now() + '.' + extension;
+        
+            // setUploading(true);
+            // setTransferred(0);
+        
+            const storageRef = storage().ref(`photos/${filename}`);
+            const task = storageRef.putFile(uploadUri);
+        
+            // Set transferred state
+            // task.on('state_changed', (taskSnapshot) => {
+            //   console.log(
+            //     `${taskSnapshot.bytesTransferred} transferred out of ${taskSnapshot.totalBytes}`,
+            //   );
+        
+            //   setTransferred(
+            //     Math.round(taskSnapshot.bytesTransferred / taskSnapshot.totalBytes) *
+            //       100,
+            //   );
+            // });
+        
+            try {
+              await task;
+        
+              const url = await storageRef.getDownloadURL();
+              setImage(null);
+              setInput('')
+        
+              // Alert.alert(
+              //   'Image uploaded!',
+              //   'Your image has been uploaded to the Firebase Cloud Storage Successfully!',
+              // );
+              return url;
+        
+            } catch (e) {
+              console.log(e);
+              return null;
+            }
         }
-
 
     return(
         <View style={{flex:1, backgroundColor: '#fff'}}>
@@ -72,7 +149,7 @@ export const Post = ({navigation}) => {
             <ScrollView>
                 <View style={styles.imageContainer}>
                     <TouchableOpacity onPress={onChooseFromLibrary} activeOpacity={0.5}>
-                        <Image source={image.length>0 ? {uri: image} : Images.gallery} resizeMode='cover' style={image.length>0 ? styles.image : styles.nonImage} />
+                        <Image source={image != null ? {uri: image} : Images.gallery} resizeMode='cover' style={image != null ? styles.image : styles.nonImage} />
                     </TouchableOpacity>
                 </View>
 
@@ -88,8 +165,8 @@ export const Post = ({navigation}) => {
                     />
                 </View>
 
-                <View style={image.length>0 ? styles.button : styles.disableButton}>
-                    <TouchableOpacity activeOpacity={0.5} onPress={onPost}>
+                <View style={image != null  && input.length>0 ? styles.button : styles.disableButton}>
+                    <TouchableOpacity activeOpacity={0.5} onPress={submitPost}>
                         <Text style={styles.buttonText}>Post</Text>
                     </TouchableOpacity>
                 </View>
